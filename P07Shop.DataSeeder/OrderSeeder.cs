@@ -8,7 +8,7 @@ namespace P07Shop.DataSeeder
     {
         public static List<Order> GenerateOrderData()
         {
-            int orderId = 1;
+            int orderId = 16;
             Random random = new Random();
             var orderFaker = new Faker<Order>()
                 .UseSeed(123456)
@@ -16,7 +16,7 @@ namespace P07Shop.DataSeeder
                 .RuleFor(x => x.TotalPrice, x => Math.Round((random.NextDouble() * (100 - 10) + 10),2))
                 .RuleFor(x=>x.Id, x=> orderId++);
 
-            return orderFaker.Generate(10).ToList();
+            return orderFaker.Generate(35).ToList();
 
         }
     }

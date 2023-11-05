@@ -7,6 +7,6 @@ namespace P06Shop.Shared.Shop
 
         public double TotalPrice { get; set; }
 
-        public ICollection<OrderProduct>? OrderProducts { get; set; }
+       
     }
 }

@@ -18,10 +18,17 @@ namespace P04WeatherForecastAPI.Client.ViewModels
 {
     public partial class OrdersViewModel : ObservableObject
     {
+        private const int ItemsPerPage = 10;
+        private int currentPage = 1;
+        public int TotalPages => (int)Math.Ceiling((double)Orders.Count / ItemsPerPage);
         private readonly IOrderService _orderService;
         private readonly OrderDetailsView _orderDetailsView;
         private readonly IMessageDialogService _messageDialogService;
         public ObservableCollection<Order> Orders { get; set; }
+        public ObservableCollection<Order> DisplayedOrders { get; set; }
+
+        [ObservableProperty]
+        private String currentPageText = "1";
 
         [ObservableProperty]
         private Order selectedOrder;
@@ -36,6 +43,7 @@ namespace P04WeatherForecastAPI.Client.ViewModels
             _messageDialogService = messageDialogService;
             _orderService = OrderService;
             Orders = new ObservableCollection<Order>();
+            DisplayedOrders = new ObservableCollection<Order>();
         }
 
         public async Task GetOrders()
@@ -48,7 +56,40 @@ namespace P04WeatherForecastAPI.Client.ViewModels
                 {
                     Orders.Add(p);
                 }
+                UpdateDisplayedOrders();
             }
+        }
+
+        private void UpdateDisplayedOrders()
+        {
+            int startIndex = (currentPage - 1) * ItemsPerPage;           
+            DisplayedOrders.Clear();
+            for(int i=startIndex; i<startIndex+ItemsPerPage+1&&i<Orders.Count; i++)
+            {
+                DisplayedOrders.Add(Orders[i]);
+            }
+        }
+
+        private void GoToPage(int pageNumber)
+        {
+            if (pageNumber < 1 || pageNumber > TotalPages)
+                return;
+
+            currentPage = pageNumber;
+            CurrentPageText = $"{currentPage}";
+            UpdateDisplayedOrders();
+        }
+
+        [RelayCommand]
+        public void PrevPage()
+        {
+            GoToPage(currentPage - 1);
+        }
+
+        [RelayCommand]
+        public void NextPage()
+        {
+            GoToPage(currentPage + 1);
         }
 
         [RelayCommand]
@@ -93,7 +134,7 @@ namespace P04WeatherForecastAPI.Client.ViewModels
             await GetOrders();
         }
 
-      
+
 
         [RelayCommand]
         public async Task Save()
@@ -115,17 +156,18 @@ namespace P04WeatherForecastAPI.Client.ViewModels
         }
 
 
-         [RelayCommand]
-         public async Task New()
-         {
-             _orderDetailsView.Show();
-             _orderDetailsView.DataContext = this;
+        [RelayCommand]
+        public async Task New()
+        {
+            _orderDetailsView.Show();
+            _orderDetailsView.DataContext = this;
             SelectedOrder = new Order
             {
                 Date = DateTime.Now
             };
         }
 
-    
+
+
     }
 }
